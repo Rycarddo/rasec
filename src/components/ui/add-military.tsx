@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "./label";
 import React from "react";
-import { Field, FieldLabel } from "./field";
+import { Field } from "./field";
 import {
   InputGroup,
   InputGroupAddon,
@@ -29,6 +29,9 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "./calendar";
+import { Checkbox } from "./checkbox";
+import { toast } from "sonner";
+import newMilitary from "@/actions/new-military";
 
 export default function AddMilitary() {
   function formatDate(date: Date | undefined) {
@@ -47,10 +50,158 @@ export default function AddMilitary() {
     }
     return !isNaN(date.getTime());
   }
-  const [open, setOpen] = React.useState(false);
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
-  const [month, setMonth] = React.useState<Date | undefined>(date);
-  const [value, setValue] = React.useState(formatDate(date));
+  const [selectedQualifications, setSelectedQualifications] = React.useState<
+    string[]
+  >([]);
+
+  // add military states
+  const [grad, setGrad] = React.useState("");
+  const [fullName, setFullName] = React.useState("");
+  const [warName, setWarName] = React.useState("");
+  const [section, setSection] = React.useState("");
+  const [maintenance, setMaintenance] = React.useState("");
+  const [identity, setIdentity] = React.useState("");
+  const [saram, setSaram] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [cpf, setCpf] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [graduationDate, setGraduationDate] = React.useState<Date>();
+  const [lastPromotion, setLastPromotion] = React.useState<Date>();
+  const [pracaDate, setPracaDate] = React.useState<Date>();
+  const [presentationDate, setPresentationDate] = React.useState<Date>();
+  const [situation, setSituation] = React.useState("");
+  const [operationalScore, setOperationalScore] = React.useState("");
+  const [examiner, setExaminer] = React.useState("");
+  const [theoreticalDate, setTheoreticalDate] = React.useState<Date>();
+  const [lpna, setLpna] = React.useState("");
+  const [htValidity, setHtValidity] = React.useState<Date>();
+  const [inspsauValidity, setInspsauValidity] = React.useState<Date>();
+  const [birthDate, setBirthDate] = React.useState<Date>();
+
+  // estados separados
+  const [graduationOpen, setGraduationOpen] = React.useState(false);
+  const [graduationMonth, setGraduationMonth] = React.useState<
+    Date | undefined
+  >();
+
+  const [lastPromotionOpen, setLastPromotionOpen] = React.useState(false);
+  const [lastPromotionMonth, setLastPromotionMonth] = React.useState<
+    Date | undefined
+  >();
+
+  const [pracaOpen, setPracaOpen] = React.useState(false);
+  const [pracaMonth, setPracaMonth] = React.useState<Date | undefined>();
+
+  const [presentationOpen, setPresentationOpen] = React.useState(false);
+  const [presentationMonth, setPresentationMonth] = React.useState<
+    Date | undefined
+  >();
+
+  const [theoreticalOpen, setTheoreticalOpen] = React.useState(false);
+  const [theoreticalMonth, setTheoreticalMonth] = React.useState<
+    Date | undefined
+  >();
+
+  const [htOpen, setHtOpen] = React.useState(false);
+  const [htMonth, setHtMonth] = React.useState<Date | undefined>();
+
+  const [inspsauOpen, setInspsauOpen] = React.useState(false);
+  const [inspsauMonth, setInspsauMonth] = React.useState<Date | undefined>();
+
+  const [birthOpen, setBirthOpen] = React.useState(false);
+  const [birthMonth, setBirthMonth] = React.useState<Date | undefined>();
+
+  const qualifications = [
+    { value: "afis", label: "AFIS" },
+    { value: "fis", label: "FIS" },
+    { value: "sar", label: "SAR" },
+    { value: "dm", label: "DM" },
+  ];
+
+  const [qualificationOpen, setQualificationOpen] = React.useState(false);
+
+  const toggleQualification = (value: string) => {
+    setSelectedQualifications((prev) =>
+      prev.includes(value) ? prev.filter((q) => q !== value) : [...prev, value],
+    );
+  };
+
+  const handleSubmit = async () => {
+    if (!fullName || !warName || !grad) {
+      toast.error("Preencha os campos obrigatórios!");
+      return;
+    }
+
+    if (
+      !graduationDate ||
+      !lastPromotion ||
+      !pracaDate ||
+      !presentationDate ||
+      !birthDate ||
+      !htValidity ||
+      !inspsauValidity
+    ) {
+      toast.error("Preencha todas as datas!");
+      return;
+    }
+
+    const result = await newMilitary({
+      militaryRank: grad,
+      fullName: fullName,
+      warName: warName,
+      section: section,
+      situation: situation,
+      qualifications: selectedQualifications,
+      maintenance: maintenance === "yes",
+      identity: identity,
+      saram: saram,
+      cpf: cpf,
+      lpna: lpna,
+      phone: phone,
+      email: email,
+      birthDateAt: birthDate,
+      graduatedAt: graduationDate,
+      lastPromotedAt: lastPromotion,
+      pracaAt: pracaDate,
+      presentationDate: presentationDate,
+      htValidityAt: htValidity,
+      inspsauValidityAt: inspsauValidity,
+      examiner: examiner,
+      areaTimeAt: presentationDate,
+      operationalScore: operationalScore,
+      theoreticalDate: theoreticalDate,
+    });
+
+    if (result.success) {
+      toast.success("Militar cadastrado com sucesso!");
+
+      setGrad("");
+      setFullName("");
+      setWarName("");
+      setSection("");
+      setMaintenance("");
+      setIdentity("");
+      setSaram("");
+      setPhone("");
+      setCpf("");
+      setEmail("");
+      setGraduationDate(undefined);
+      setLastPromotion(undefined);
+      setPracaDate(undefined);
+      setPresentationDate(undefined);
+      setSituation("");
+      setOperationalScore("");
+      setExaminer("");
+      setTheoreticalDate(undefined);
+      setLpna("");
+      setHtValidity(undefined);
+      setInspsauValidity(undefined);
+      setBirthDate(undefined);
+      setSelectedQualifications([]);
+    } else {
+      toast.error(result.error || "Erro ao cadastrar militar");
+    }
+  };
 
   return (
     <>
@@ -73,16 +224,31 @@ export default function AddMilitary() {
           <div className="flex flex-row gap-24">
             <div id="col-1" className="flex flex-col gap-4">
               <Label htmlFor="grad">POSTO/GRAD</Label>
-              <Input id="grad" placeholder="SO" />
+              <Input
+                id="grad"
+                placeholder="SO"
+                value={grad}
+                onChange={(e) => setGrad(e.target.value)}
+              />
 
               <Label htmlFor="name">NOME COMPLETO</Label>
-              <Input id="name" placeholder="FULANO DE TAL" />
+              <Input
+                id="name"
+                placeholder="FULANO DE TAL"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
 
               <Label htmlFor="war-name">NOME DE GUERRA</Label>
-              <Input id="war-name" placeholder="FULANO" />
+              <Input
+                id="war-name"
+                placeholder="FULANO"
+                value={warName}
+                onChange={(e) => setWarName(e.target.value)}
+              />
 
               <Label htmlFor="section">SEÇÃO</Label>
-              <Select>
+              <Select value={section} onValueChange={setSection}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Seção" />
                 </SelectTrigger>
@@ -101,10 +267,46 @@ export default function AddMilitary() {
               </Select>
 
               <Label htmlFor="qualifications">HABILITAÇÕES</Label>
-              <Input id="qualifications" />
+              <Popover
+                open={qualificationOpen}
+                onOpenChange={setQualificationOpen}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-[180px] justify-start font-normal"
+                  >
+                    {selectedQualifications.length > 0
+                      ? selectedQualifications
+                          .map(
+                            (val) =>
+                              qualifications.find((q) => q.value === val)
+                                ?.label,
+                          )
+                          .join(", ")
+                      : "Selecione"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48" align="start">
+                  <div className="flex flex-col gap-2">
+                    {qualifications.map((qual) => (
+                      <Field key={qual.value} orientation="horizontal">
+                        <Checkbox
+                          id={qual.value}
+                          checked={selectedQualifications.includes(qual.value)}
+                          onCheckedChange={() =>
+                            toggleQualification(qual.value)
+                          }
+                        />
+                        <Label htmlFor={qual.value}>{qual.label}</Label>
+                      </Field>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
 
               <Label htmlFor="maintenance">MANUTENÇÃO</Label>
-              <Select>
+              <Select value={maintenance} onValueChange={setMaintenance}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Seção" />
                 </SelectTrigger>
@@ -115,45 +317,67 @@ export default function AddMilitary() {
               </Select>
 
               <Label htmlFor="identity">IDENTIDADE</Label>
-              <Input id="identity" />
+              <Input
+                id="identity"
+                value={identity}
+                onChange={(e) => setIdentity(e.target.value)}
+              />
 
               <Label htmlFor="saram">SARAM</Label>
-              <Input id="saram" />
+              <Input
+                id="saram"
+                value={saram}
+                onChange={(e) => setSaram(e.target.value)}
+              />
 
               <Label htmlFor="phone">TELEFONE</Label>
-              <Input id="phone" />
+              <Input
+                id="phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
             </div>
 
             <div id="col-2" className="flex flex-col gap-4">
               <Label htmlFor="cpf">CPF</Label>
-              <Input id="cpf" />
+              <Input
+                id="cpf"
+                value={cpf}
+                onChange={(e) => setCpf(e.target.value)}
+              />
 
               <Label htmlFor="email">EMAIL</Label>
-              <Input id="email" />
+              <Input
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
 
               <Label htmlFor="graduation-date">DATA DA FORMATURA</Label>
               <Field className="mx-auto w-48">
                 <InputGroup>
                   <InputGroupInput
-                    id="date-required"
-                    value={value}
+                    id="graduation-date"
+                    value={formatDate(graduationDate)}
                     onChange={(e) => {
                       const date = new Date(e.target.value);
-                      setValue(e.target.value);
                       if (isValidDate(date)) {
-                        setDate(date);
-                        setMonth(date);
+                        setGraduationDate(date);
+                        setGraduationMonth(date);
                       }
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "ArrowDown") {
                         e.preventDefault();
-                        setOpen(true);
+                        setGraduationOpen(true);
                       }
                     }}
                   />
                   <InputGroupAddon align="inline-end">
-                    <Popover open={open} onOpenChange={setOpen}>
+                    <Popover
+                      open={graduationOpen}
+                      onOpenChange={setGraduationOpen}
+                    >
                       <PopoverTrigger asChild>
                         <InputGroupButton
                           id="date-picker"
@@ -173,13 +397,12 @@ export default function AddMilitary() {
                       >
                         <Calendar
                           mode="single"
-                          selected={date}
-                          month={month}
-                          onMonthChange={setMonth}
+                          selected={graduationDate}
+                          month={graduationMonth}
+                          onMonthChange={setGraduationMonth}
                           onSelect={(date) => {
-                            setDate(date);
-                            setValue(formatDate(date));
-                            setOpen(false);
+                            setGraduationDate(date);
+                            setGraduationOpen(false);
                           }}
                         />
                       </PopoverContent>
@@ -192,25 +415,27 @@ export default function AddMilitary() {
               <Field className="mx-auto w-48">
                 <InputGroup>
                   <InputGroupInput
-                    id="date-required"
-                    value={value}
+                    id="last-promotion"
+                    value={formatDate(lastPromotion)}
                     onChange={(e) => {
                       const date = new Date(e.target.value);
-                      setValue(e.target.value);
                       if (isValidDate(date)) {
-                        setDate(date);
-                        setMonth(date);
+                        setLastPromotion(date);
+                        setLastPromotionMonth(date);
                       }
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "ArrowDown") {
                         e.preventDefault();
-                        setOpen(true);
+                        setLastPromotionOpen(true);
                       }
                     }}
                   />
                   <InputGroupAddon align="inline-end">
-                    <Popover open={open} onOpenChange={setOpen}>
+                    <Popover
+                      open={lastPromotionOpen}
+                      onOpenChange={setLastPromotionOpen}
+                    >
                       <PopoverTrigger asChild>
                         <InputGroupButton
                           id="date-picker"
@@ -230,13 +455,12 @@ export default function AddMilitary() {
                       >
                         <Calendar
                           mode="single"
-                          selected={date}
-                          month={month}
-                          onMonthChange={setMonth}
+                          selected={lastPromotion}
+                          month={lastPromotionMonth}
+                          onMonthChange={setLastPromotionMonth}
                           onSelect={(date) => {
-                            setDate(date);
-                            setValue(formatDate(date));
-                            setOpen(false);
+                            setLastPromotion(date);
+                            setLastPromotionOpen(false);
                           }}
                         />
                       </PopoverContent>
@@ -249,25 +473,24 @@ export default function AddMilitary() {
               <Field className="mx-auto w-48">
                 <InputGroup>
                   <InputGroupInput
-                    id="date-required"
-                    value={value}
+                    id="praca-date"
+                    value={formatDate(pracaDate)}
                     onChange={(e) => {
                       const date = new Date(e.target.value);
-                      setValue(e.target.value);
                       if (isValidDate(date)) {
-                        setDate(date);
-                        setMonth(date);
+                        setPracaDate(date);
+                        setPracaMonth(date);
                       }
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "ArrowDown") {
                         e.preventDefault();
-                        setOpen(true);
+                        setPracaOpen(true);
                       }
                     }}
                   />
                   <InputGroupAddon align="inline-end">
-                    <Popover open={open} onOpenChange={setOpen}>
+                    <Popover open={pracaOpen} onOpenChange={setPracaOpen}>
                       <PopoverTrigger asChild>
                         <InputGroupButton
                           id="date-picker"
@@ -287,13 +510,12 @@ export default function AddMilitary() {
                       >
                         <Calendar
                           mode="single"
-                          selected={date}
-                          month={month}
-                          onMonthChange={setMonth}
+                          selected={pracaDate}
+                          month={pracaMonth}
+                          onMonthChange={setPracaMonth}
                           onSelect={(date) => {
-                            setDate(date);
-                            setValue(formatDate(date));
-                            setOpen(false);
+                            setPracaDate(date);
+                            setPracaOpen(false);
                           }}
                         />
                       </PopoverContent>
@@ -306,25 +528,27 @@ export default function AddMilitary() {
               <Field className="mx-auto w-48">
                 <InputGroup>
                   <InputGroupInput
-                    id="date-required"
-                    value={value}
+                    id="presentation-date"
+                    value={formatDate(presentationDate)}
                     onChange={(e) => {
                       const date = new Date(e.target.value);
-                      setValue(e.target.value);
                       if (isValidDate(date)) {
-                        setDate(date);
-                        setMonth(date);
+                        setPresentationDate(date);
+                        setPresentationMonth(date);
                       }
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "ArrowDown") {
                         e.preventDefault();
-                        setOpen(true);
+                        setPresentationOpen(true);
                       }
                     }}
                   />
                   <InputGroupAddon align="inline-end">
-                    <Popover open={open} onOpenChange={setOpen}>
+                    <Popover
+                      open={presentationOpen}
+                      onOpenChange={setPresentationOpen}
+                    >
                       <PopoverTrigger asChild>
                         <InputGroupButton
                           id="date-picker"
@@ -344,13 +568,12 @@ export default function AddMilitary() {
                       >
                         <Calendar
                           mode="single"
-                          selected={date}
-                          month={month}
-                          onMonthChange={setMonth}
+                          selected={presentationDate}
+                          month={presentationMonth}
+                          onMonthChange={setPresentationMonth}
                           onSelect={(date) => {
-                            setDate(date);
-                            setValue(formatDate(date));
-                            setOpen(false);
+                            setPresentationDate(date);
+                            setPresentationOpen(false);
                           }}
                         />
                       </PopoverContent>
@@ -359,14 +582,22 @@ export default function AddMilitary() {
                 </InputGroup>
               </Field>
 
+              {/* Vai ser calculado no backend tempo_de_area = data_atual - data_de_apresentacao */}
+
+              {/* 
               <Label htmlFor="area-time">TEMPO DE ÁREA</Label>
               <Input id="area-time" />
+              */}
 
+              {/* Vai ser calculado no backend tempo_de_servico = data_atual - data_de_praca */}
+
+              {/*
               <Label htmlFor="duty-time">TEMPO DE SERVIÇO</Label>
-              <Input id="duty-time" />
+              <Input id="duty-time" /> 
+              */}
 
               <Label htmlFor="situation">SITUAÇÃO</Label>
-              <Select>
+              <Select value={situation} onValueChange={setSituation}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Situação" />
                 </SelectTrigger>
@@ -376,16 +607,18 @@ export default function AddMilitary() {
                   <SelectItem value="nao-aplicavel">NÃO APLICÁVEL</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
 
-            <div id="col-3" className="flex flex-col gap-4">
               <Label htmlFor="operational-score-exam">
                 NOTA TESTE OPERACIONAL
               </Label>
-              <Input id="operational-score-exam" />
+              <Input
+                id="operational-score-exam"
+                value={operationalScore}
+                onChange={(e) => setOperationalScore(e.target.value)}
+              />
 
               <Label htmlFor="examiner">AVALIADOR</Label>
-              <Select>
+              <Select value={examiner} onValueChange={setExaminer}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Seção" />
                 </SelectTrigger>
@@ -394,30 +627,34 @@ export default function AddMilitary() {
                   <SelectItem value="no">NÃO</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
 
+            <div id="col-3" className="flex flex-col gap-4">
               <Label htmlFor="theoretical-date-exam">DATA PROVA TEÓRICA</Label>
               <Field className="mx-auto w-48">
                 <InputGroup>
                   <InputGroupInput
-                    id="date-required"
-                    value={value}
+                    id="theoretical-date-exam"
+                    value={formatDate(theoreticalDate)}
                     onChange={(e) => {
                       const date = new Date(e.target.value);
-                      setValue(e.target.value);
                       if (isValidDate(date)) {
-                        setDate(date);
-                        setMonth(date);
+                        setTheoreticalDate(date);
+                        setTheoreticalMonth(date);
                       }
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "ArrowDown") {
                         e.preventDefault();
-                        setOpen(true);
+                        setTheoreticalOpen(true);
                       }
                     }}
                   />
                   <InputGroupAddon align="inline-end">
-                    <Popover open={open} onOpenChange={setOpen}>
+                    <Popover
+                      open={theoreticalOpen}
+                      onOpenChange={setTheoreticalOpen}
+                    >
                       <PopoverTrigger asChild>
                         <InputGroupButton
                           id="date-picker"
@@ -437,13 +674,12 @@ export default function AddMilitary() {
                       >
                         <Calendar
                           mode="single"
-                          selected={date}
-                          month={month}
-                          onMonthChange={setMonth}
+                          selected={theoreticalDate}
+                          month={theoreticalMonth}
+                          onMonthChange={setTheoreticalMonth}
                           onSelect={(date) => {
-                            setDate(date);
-                            setValue(formatDate(date));
-                            setOpen(false);
+                            setTheoreticalDate(date);
+                            setTheoreticalOpen(false);
                           }}
                         />
                       </PopoverContent>
@@ -453,31 +689,34 @@ export default function AddMilitary() {
               </Field>
 
               <Label htmlFor="lpna">LPNA</Label>
-              <Input id="lpna" />
+              <Input
+                id="lpna"
+                value={lpna}
+                onChange={(e) => setLpna(e.target.value)}
+              />
 
               <Label htmlFor="ht-validity">VALIDADE HT</Label>
               <Field className="mx-auto w-48">
                 <InputGroup>
                   <InputGroupInput
-                    id="date-required"
-                    value={value}
+                    id="ht-validity"
+                    value={formatDate(htValidity)}
                     onChange={(e) => {
                       const date = new Date(e.target.value);
-                      setValue(e.target.value);
                       if (isValidDate(date)) {
-                        setDate(date);
-                        setMonth(date);
+                        setHtValidity(date);
+                        setHtMonth(date);
                       }
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "ArrowDown") {
                         e.preventDefault();
-                        setOpen(true);
+                        setHtOpen(true);
                       }
                     }}
                   />
                   <InputGroupAddon align="inline-end">
-                    <Popover open={open} onOpenChange={setOpen}>
+                    <Popover open={htOpen} onOpenChange={setHtOpen}>
                       <PopoverTrigger asChild>
                         <InputGroupButton
                           id="date-picker"
@@ -497,13 +736,12 @@ export default function AddMilitary() {
                       >
                         <Calendar
                           mode="single"
-                          selected={date}
-                          month={month}
-                          onMonthChange={setMonth}
+                          selected={htValidity}
+                          month={htMonth}
+                          onMonthChange={setHtMonth}
                           onSelect={(date) => {
-                            setDate(date);
-                            setValue(formatDate(date));
-                            setOpen(false);
+                            setHtValidity(date);
+                            setHtOpen(false);
                           }}
                         />
                       </PopoverContent>
@@ -516,25 +754,24 @@ export default function AddMilitary() {
               <Field className="mx-auto w-48">
                 <InputGroup>
                   <InputGroupInput
-                    id="date-required"
-                    value={value}
+                    id="inspsau-validity"
+                    value={formatDate(inspsauValidity)}
                     onChange={(e) => {
                       const date = new Date(e.target.value);
-                      setValue(e.target.value);
                       if (isValidDate(date)) {
-                        setDate(date);
-                        setMonth(date);
+                        setInspsauValidity(date);
+                        setInspsauMonth(date);
                       }
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "ArrowDown") {
                         e.preventDefault();
-                        setOpen(true);
+                        setInspsauOpen(true);
                       }
                     }}
                   />
                   <InputGroupAddon align="inline-end">
-                    <Popover open={open} onOpenChange={setOpen}>
+                    <Popover open={inspsauOpen} onOpenChange={setInspsauOpen}>
                       <PopoverTrigger asChild>
                         <InputGroupButton
                           id="date-picker"
@@ -554,13 +791,12 @@ export default function AddMilitary() {
                       >
                         <Calendar
                           mode="single"
-                          selected={date}
-                          month={month}
-                          onMonthChange={setMonth}
+                          selected={inspsauValidity}
+                          month={inspsauMonth}
+                          onMonthChange={setInspsauMonth}
                           onSelect={(date) => {
-                            setDate(date);
-                            setValue(formatDate(date));
-                            setOpen(false);
+                            setInspsauValidity(date);
+                            setInspsauOpen(false);
                           }}
                         />
                       </PopoverContent>
@@ -573,25 +809,24 @@ export default function AddMilitary() {
               <Field className="mx-auto w-48">
                 <InputGroup>
                   <InputGroupInput
-                    id="date-required"
-                    value={value}
+                    id="birth-date"
+                    value={formatDate(birthDate)}
                     onChange={(e) => {
                       const date = new Date(e.target.value);
-                      setValue(e.target.value);
                       if (isValidDate(date)) {
-                        setDate(date);
-                        setMonth(date);
+                        setBirthDate(date);
+                        setBirthMonth(date);
                       }
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "ArrowDown") {
                         e.preventDefault();
-                        setOpen(true);
+                        setBirthOpen(true);
                       }
                     }}
                   />
                   <InputGroupAddon align="inline-end">
-                    <Popover open={open} onOpenChange={setOpen}>
+                    <Popover open={birthOpen} onOpenChange={setBirthOpen}>
                       <PopoverTrigger asChild>
                         <InputGroupButton
                           id="date-picker"
@@ -611,13 +846,12 @@ export default function AddMilitary() {
                       >
                         <Calendar
                           mode="single"
-                          selected={date}
-                          month={month}
-                          onMonthChange={setMonth}
+                          selected={birthDate}
+                          month={birthMonth}
+                          onMonthChange={setBirthMonth}
                           onSelect={(date) => {
-                            setDate(date);
-                            setValue(formatDate(date));
-                            setOpen(false);
+                            setBirthDate(date);
+                            setBirthOpen(false);
                           }}
                         />
                       </PopoverContent>
@@ -629,7 +863,9 @@ export default function AddMilitary() {
           </div>
 
           <div className="flex justify-end">
-            <Button className="rounded-full w-32">Cadastrar</Button>
+            <Button className="rounded-full w-32" onClick={handleSubmit}>
+              Cadastrar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
