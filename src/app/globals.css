@@ -122,3 +122,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Esconde a scrollbar, mas mantém o scroll */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge antigo */
+}
+.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}

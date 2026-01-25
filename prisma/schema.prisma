@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id       String   @id @default(uuid())
+  email    String   @unique
+  name     String
+  role     UserRole @default(READONLY)
+  isActive Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+  READONLY
+}
+
+model Military {
+  // ID para encontrar o usuário no BD
+  id String @id @default(uuid())
+
+  // Posto / Graduacao -> 3S / 2S / 1S / SO
+  militaryRank MilitaryRank
+
+  // Nome completo
+  fullName String
+
+  // Nome de guerra
+  warName String
+
+  // Secao -> COM, CIVA, FIS, OPG, SAR, DT, DTCEA-BE, DTCEA-BV, DTCEA-PV, DTCEA-GM
+  section Section
+
+  // Situacao -> escala / expediente
+  situation MilitarySituation
+
+  // ************************************
+
+  // Habilitacoes -> FIS / AFIS-S / AFIS-R /
+  qualifications Qualification[]
+
+  // Manutencao? -> Sim ou Nao
+  maintenance Boolean
+
+  // ************************************
+
+  // Documentos
+  identity String @unique
+  saram    String @unique
+  cpf      String @unique
+  lpna     String @unique
+
+  // ************************************
+
+  // CONTATO
+  phone String @unique
+  email String @unique
+
+  // ************************************
+
+  // Data de nascimento
+  birthDateAt DateTime
+
+  // Data de formatura
+  graduatedAt DateTime
+
+  // Data da ultima promocao
+  lastPromotedAt DateTime
+
+  // Data de praca
+  pracaAt DateTime
+
+  // Data de apresentacao
+  presentationDate DateTime
+
+  // ************************************
+
+  // Validade da HT
+  htValidityAt DateTime
+
+  // Data da inspecao de saude
+  inspsauValidityAt DateTime
+
+  // ************************************
+
+  // Avaliador?
+  examiner String
+
+  // ************************************
+
+  // Tempo de area
+  areaTimeAt DateTime
+
+  // Tempo de servico -> tem que atualizar automaticamente com o passar dos dias -> tempo de servico = data atual - data de praca
+  //dutyTimeAt DateTime
+
+  // ************************************
+
+  // Nota no teste operacional -> sera um array de notas
+  operationalTests OperationalTest[]
+
+  // Data do teste teorico -> sera um array de datas
+  theoreticalTestDates TheoreticalTest[]
+
+  // Visivel ou nao
+  visible Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([section])
+  @@index([militaryRank])
+  @@index([situation])
+  @@index([visible])
+  @@index([htValidityAt])
+  @@index([inspsauValidityAt])
+}
+
+enum Section {
+  COM
+  CIVA
+  FIS
+  OPG
+  SAR
+  DT
+  DTCEA_BE
+  DTCEA_BV
+  DTCEA_PV
+  DTCEA_GM
+}
+
+enum MilitarySituation {
+  ESCALA
+  EXPEDIENTE
+  AFASTADO
+}
+
+enum MilitaryRank {
+  Rank_SO
+  Rank_1S
+  Rank_2S
+  Rank_3S
+}
+
+// Tabela de habilitacoes -> FIS, CIVA, SAR...
+model Qualification {
+  id String @id @default(uuid())
+
+  militaryId String
+  military   Military @relation(fields: [militaryId], references: [id], onDelete: Cascade)
+
+  name String
+
+  @@index([militaryId])
+  @@index([name])
+}
+
+// Tabela de notas nos testes operacionais
+model OperationalTest {
+  id String @id @default(uuid())
+
+  militaryId String
+  military   Military @relation(fields: [militaryId], references: [id], onDelete: Cascade)
+
+  score  Decimal
+  testAt DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([militaryId])
+  @@index([testAt])
+}
+
+// Tabela de datas dos testes teóricos
+model TheoreticalTest {
+  id String @id @default(uuid())
+
+  militaryId String
+  military   Military @relation(fields: [militaryId], references: [id], onDelete: Cascade)
+
+  testAt DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([militaryId])
+  @@index([testAt])
+}
