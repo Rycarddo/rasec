@@ -44,11 +44,25 @@ export default function AddMilitary() {
       year: "numeric",
     });
   }
-  function isValidDate(date: Date | undefined) {
-    if (!date) {
-      return false;
+  function parseDate(dateString: string): Date | undefined {
+    const parts = dateString.split(/[\/\-]/);
+    if (parts.length === 3) {
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const year = parseInt(parts[2], 10);
+
+      if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+        const date = new Date(year, month, day);
+        if (
+          date.getDate() === day &&
+          date.getMonth() === month &&
+          date.getFullYear() === year
+        ) {
+          return date;
+        }
+      }
     }
-    return !isNaN(date.getTime());
+    return undefined;
   }
   const [selectedQualifications, setSelectedQualifications] = React.useState<
     string[]
@@ -77,6 +91,15 @@ export default function AddMilitary() {
   const [htValidity, setHtValidity] = React.useState<Date>();
   const [inspsauValidity, setInspsauValidity] = React.useState<Date>();
   const [birthDate, setBirthDate] = React.useState<Date>();
+
+  const [graduationText, setGraduationText] = React.useState("");
+  const [lastPromotionText, setLastPromotionText] = React.useState("");
+  const [pracaText, setPracaText] = React.useState("");
+  const [presentationText, setPresentationText] = React.useState("");
+  const [theoreticalText, setTheoreticalText] = React.useState("");
+  const [htText, setHtText] = React.useState("");
+  const [inspsauText, setInspsauText] = React.useState("");
+  const [birthText, setBirthText] = React.useState("");
 
   // estados separados
   const [graduationOpen, setGraduationOpen] = React.useState(false);
@@ -198,6 +221,14 @@ export default function AddMilitary() {
       setInspsauValidity(undefined);
       setBirthDate(undefined);
       setSelectedQualifications([]);
+      setGraduationText("");
+      setLastPromotionText("");
+      setPracaText("");
+      setPresentationText("");
+      setTheoreticalText("");
+      setHtText("");
+      setInspsauText("");
+      setBirthText("");
     } else {
       toast.error(result.error || "Erro ao cadastrar militar");
     }
@@ -206,7 +237,7 @@ export default function AddMilitary() {
   return (
     <>
       <Dialog>
-        <DialogTrigger>
+        <DialogTrigger asChild>
           <Button className="rounded-full cursor-pointer">
             Adicionar militar
           </Button>
@@ -358,12 +389,17 @@ export default function AddMilitary() {
                 <InputGroup>
                   <InputGroupInput
                     id="graduation-date"
-                    value={formatDate(graduationDate)}
+                    placeholder="dd/MM/aaaa"
+                    value={graduationText}
                     onChange={(e) => {
-                      const date = new Date(e.target.value);
-                      if (isValidDate(date)) {
-                        setGraduationDate(date);
-                        setGraduationMonth(date);
+                      setGraduationText(e.target.value);
+                    }}
+                    onBlur={(e) => {
+                      const parsed = parseDate(e.target.value);
+                      if (parsed) {
+                        setGraduationDate(parsed);
+                        setGraduationMonth(parsed);
+                        setGraduationText(formatDate(parsed));
                       }
                     }}
                     onKeyDown={(e) => {
@@ -402,6 +438,7 @@ export default function AddMilitary() {
                           onMonthChange={setGraduationMonth}
                           onSelect={(date) => {
                             setGraduationDate(date);
+                            setGraduationText(formatDate(date));
                             setGraduationOpen(false);
                           }}
                         />
@@ -416,12 +453,17 @@ export default function AddMilitary() {
                 <InputGroup>
                   <InputGroupInput
                     id="last-promotion"
-                    value={formatDate(lastPromotion)}
+                    placeholder="dd/MM/aaaa"
+                    value={lastPromotionText}
                     onChange={(e) => {
-                      const date = new Date(e.target.value);
-                      if (isValidDate(date)) {
-                        setLastPromotion(date);
-                        setLastPromotionMonth(date);
+                      setLastPromotionText(e.target.value);
+                    }}
+                    onBlur={(e) => {
+                      const parsed = parseDate(e.target.value);
+                      if (parsed) {
+                        setLastPromotion(parsed);
+                        setLastPromotionMonth(parsed);
+                        setLastPromotionText(formatDate(parsed));
                       }
                     }}
                     onKeyDown={(e) => {
@@ -460,6 +502,7 @@ export default function AddMilitary() {
                           onMonthChange={setLastPromotionMonth}
                           onSelect={(date) => {
                             setLastPromotion(date);
+                            setLastPromotionText(formatDate(date));
                             setLastPromotionOpen(false);
                           }}
                         />
@@ -474,12 +517,17 @@ export default function AddMilitary() {
                 <InputGroup>
                   <InputGroupInput
                     id="praca-date"
-                    value={formatDate(pracaDate)}
+                    placeholder="dd/MM/aaaa"
+                    value={pracaText}
                     onChange={(e) => {
-                      const date = new Date(e.target.value);
-                      if (isValidDate(date)) {
-                        setPracaDate(date);
-                        setPracaMonth(date);
+                      setPracaText(e.target.value);
+                    }}
+                    onBlur={(e) => {
+                      const parsed = parseDate(e.target.value);
+                      if (parsed) {
+                        setPracaDate(parsed);
+                        setPracaMonth(parsed);
+                        setPracaText(formatDate(parsed));
                       }
                     }}
                     onKeyDown={(e) => {
@@ -515,6 +563,7 @@ export default function AddMilitary() {
                           onMonthChange={setPracaMonth}
                           onSelect={(date) => {
                             setPracaDate(date);
+                            setPracaText(formatDate(date));
                             setPracaOpen(false);
                           }}
                         />
@@ -529,12 +578,17 @@ export default function AddMilitary() {
                 <InputGroup>
                   <InputGroupInput
                     id="presentation-date"
-                    value={formatDate(presentationDate)}
+                    placeholder="dd/MM/aaaa"
+                    value={presentationText}
                     onChange={(e) => {
-                      const date = new Date(e.target.value);
-                      if (isValidDate(date)) {
-                        setPresentationDate(date);
-                        setPresentationMonth(date);
+                      setPresentationText(e.target.value);
+                    }}
+                    onBlur={(e) => {
+                      const parsed = parseDate(e.target.value);
+                      if (parsed) {
+                        setPresentationDate(parsed);
+                        setPresentationMonth(parsed);
+                        setPresentationText(formatDate(parsed));
                       }
                     }}
                     onKeyDown={(e) => {
@@ -573,6 +627,7 @@ export default function AddMilitary() {
                           onMonthChange={setPresentationMonth}
                           onSelect={(date) => {
                             setPresentationDate(date);
+                            setPresentationText(formatDate(date));
                             setPresentationOpen(false);
                           }}
                         />
@@ -635,12 +690,17 @@ export default function AddMilitary() {
                 <InputGroup>
                   <InputGroupInput
                     id="theoretical-date-exam"
-                    value={formatDate(theoreticalDate)}
+                    placeholder="dd/MM/aaaa"
+                    value={theoreticalText}
                     onChange={(e) => {
-                      const date = new Date(e.target.value);
-                      if (isValidDate(date)) {
-                        setTheoreticalDate(date);
-                        setTheoreticalMonth(date);
+                      setTheoreticalText(e.target.value);
+                    }}
+                    onBlur={(e) => {
+                      const parsed = parseDate(e.target.value);
+                      if (parsed) {
+                        setTheoreticalDate(parsed);
+                        setTheoreticalMonth(parsed);
+                        setTheoreticalText(formatDate(parsed));
                       }
                     }}
                     onKeyDown={(e) => {
@@ -679,6 +739,7 @@ export default function AddMilitary() {
                           onMonthChange={setTheoreticalMonth}
                           onSelect={(date) => {
                             setTheoreticalDate(date);
+                            setTheoreticalText(formatDate(date));
                             setTheoreticalOpen(false);
                           }}
                         />
@@ -700,12 +761,17 @@ export default function AddMilitary() {
                 <InputGroup>
                   <InputGroupInput
                     id="ht-validity"
-                    value={formatDate(htValidity)}
+                    placeholder="dd/MM/aaaa"
+                    value={htText}
                     onChange={(e) => {
-                      const date = new Date(e.target.value);
-                      if (isValidDate(date)) {
-                        setHtValidity(date);
-                        setHtMonth(date);
+                      setHtText(e.target.value);
+                    }}
+                    onBlur={(e) => {
+                      const parsed = parseDate(e.target.value);
+                      if (parsed) {
+                        setHtValidity(parsed);
+                        setHtMonth(parsed);
+                        setHtText(formatDate(parsed));
                       }
                     }}
                     onKeyDown={(e) => {
@@ -741,6 +807,7 @@ export default function AddMilitary() {
                           onMonthChange={setHtMonth}
                           onSelect={(date) => {
                             setHtValidity(date);
+                            setHtText(formatDate(date));
                             setHtOpen(false);
                           }}
                         />
@@ -755,12 +822,17 @@ export default function AddMilitary() {
                 <InputGroup>
                   <InputGroupInput
                     id="inspsau-validity"
-                    value={formatDate(inspsauValidity)}
+                    placeholder="dd/MM/aaaa"
+                    value={inspsauText}
                     onChange={(e) => {
-                      const date = new Date(e.target.value);
-                      if (isValidDate(date)) {
-                        setInspsauValidity(date);
-                        setInspsauMonth(date);
+                      setInspsauText(e.target.value);
+                    }}
+                    onBlur={(e) => {
+                      const parsed = parseDate(e.target.value);
+                      if (parsed) {
+                        setInspsauValidity(parsed);
+                        setInspsauMonth(parsed);
+                        setInspsauText(formatDate(parsed));
                       }
                     }}
                     onKeyDown={(e) => {
@@ -796,6 +868,7 @@ export default function AddMilitary() {
                           onMonthChange={setInspsauMonth}
                           onSelect={(date) => {
                             setInspsauValidity(date);
+                            setInspsauText(formatDate(date));
                             setInspsauOpen(false);
                           }}
                         />
@@ -810,12 +883,17 @@ export default function AddMilitary() {
                 <InputGroup>
                   <InputGroupInput
                     id="birth-date"
-                    value={formatDate(birthDate)}
+                    placeholder="dd/MM/aaaa"
+                    value={birthText}
                     onChange={(e) => {
-                      const date = new Date(e.target.value);
-                      if (isValidDate(date)) {
-                        setBirthDate(date);
-                        setBirthMonth(date);
+                      setBirthText(e.target.value);
+                    }}
+                    onBlur={(e) => {
+                      const parsed = parseDate(e.target.value);
+                      if (parsed) {
+                        setBirthDate(parsed);
+                        setBirthMonth(parsed);
+                        setBirthText(formatDate(parsed));
                       }
                     }}
                     onKeyDown={(e) => {
@@ -851,6 +929,7 @@ export default function AddMilitary() {
                           onMonthChange={setBirthMonth}
                           onSelect={(date) => {
                             setBirthDate(date);
+                            setBirthText(formatDate(date));
                             setBirthOpen(false);
                           }}
                         />
