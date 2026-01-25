@@ -93,7 +93,7 @@ model Military {
   // ************************************
 
   // Avaliador?
-  examiner String
+  examiner Boolean
 
   // ************************************
 

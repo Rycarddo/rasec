@@ -16,12 +16,99 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScanSearch, SquarePen, Save } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { useState } from "react";
 
-export default function InfoButton() {
+type Military = {
+  id: string;
+  militaryRank: string;
+  fullName: string;
+  warName: string;
+  section: string;
+  situation: string;
+  qualifications: { id: string; name: string; militaryId: string }[];
+  maintenance: boolean;
+  identity: string;
+  saram: string;
+  cpf: string;
+  lpna: string;
+  phone: string;
+  email: string;
+  birthDateAt: Date;
+  graduatedAt: Date;
+  lastPromotedAt: Date;
+  pracaAt: Date;
+  presentationDate: Date;
+  htValidityAt: Date;
+  inspsauValidityAt: Date;
+  examiner: boolean;
+  areaTimeAt: Date;
+  operationalTests: {
+    id: string;
+    score: number | string;
+    testAt: Date;
+    militaryId: string;
+    createdAt: Date;
+  }[];
+  theoreticalTestDates: {
+    id: string;
+    testAt: Date;
+    militaryId: string;
+    createdAt: Date;
+  }[];
+};
+
+interface InfoButtonProps {
+  military: Military;
+}
+
+export default function InfoButton({ military }: InfoButtonProps) {
   const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("pt-BR");
+  };
+
+  const getDateStatus = (date: Date) => {
+    const today = new Date();
+    const validityDate = new Date(date);
+    const diffDays = Math.ceil(
+      (validityDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (diffDays < 0) return "VENCIDO";
+    if (diffDays <= 45) return "VENCENDO";
+    return "OK";
+  };
+
+  const formatRank = (rank: string) => {
+    return rank.replace("Rank_", "");
+  };
+
+  const formatSection = (section: string) => {
+    return section.replace("DTCEA_", "DTCEA-");
+  };
+
+  const calculateServiceTime = () => {
+    const today = new Date();
+    const pracaDate = new Date(military.pracaAt);
+    const diffTime = Math.abs(today.getTime() - pracaDate.getTime());
+    const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+    const diffMonths = Math.floor(
+      (diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30),
+    );
+    return `${diffYears} anos e ${diffMonths} meses`;
+  };
+
+  const calculateAreaTime = () => {
+    const today = new Date();
+    const presentationDate = new Date(military.presentationDate);
+    const diffTime = Math.abs(today.getTime() - presentationDate.getTime());
+    const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+    const diffMonths = Math.floor(
+      (diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30),
+    );
+    return `${diffYears} anos e ${diffMonths} meses`;
+  };
 
   return (
     <>
@@ -31,7 +118,9 @@ export default function InfoButton() {
         </DialogTrigger>
         <DialogContent className="overflow-x-auto">
           <DialogHeader className="flex flex-row justify-between mx-8">
-            <DialogTitle>Informações completas</DialogTitle>
+            <DialogTitle>
+              Informações completas - {military.warName}
+            </DialogTitle>
 
             <div className="flex size-5">
               <SquarePen className="cursor-pointer" />
@@ -67,34 +156,38 @@ export default function InfoButton() {
               <TableBody>
                 <TableRow>
                   {/* POSTO/GRAD */}
-                  <TableCell>SO</TableCell>
+                  <TableCell>{formatRank(military.militaryRank)}</TableCell>
 
                   {/* NOME */}
-                  <TableCell>PAPADA PAPADA PAPADA PAPADA</TableCell>
+                  <TableCell>{military.fullName}</TableCell>
 
                   {/* SECAO */}
-                  <TableCell>COM</TableCell>
+                  <TableCell>{formatSection(military.section)}</TableCell>
 
                   {/* HABILITACOES */}
-                  <TableCell>AFIS-S</TableCell>
+                  <TableCell>
+                    {military.qualifications
+                      .map((q) => q.name.toUpperCase())
+                      .join(", ")}
+                  </TableCell>
 
                   {/* MANUTENCAO */}
-                  <TableCell>SIM</TableCell>
+                  <TableCell>{military.maintenance ? "SIM" : "NÃO"}</TableCell>
 
                   {/* IDENTIDADE */}
-                  <TableCell>123456</TableCell>
+                  <TableCell>{military.identity}</TableCell>
 
                   {/* SARAM */}
-                  <TableCell>12345678</TableCell>
+                  <TableCell>{military.saram}</TableCell>
 
                   {/* TELEFONE */}
-                  <TableCell>(12) 34567-8901</TableCell>
+                  <TableCell>{military.phone}</TableCell>
 
                   {/* CPF */}
-                  <TableCell>12345678901</TableCell>
+                  <TableCell>{military.cpf}</TableCell>
 
                   {/* EMAIL */}
-                  <TableCell>PAPADA@EMAIL.COM</TableCell>
+                  <TableCell>{military.email}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -123,28 +216,32 @@ export default function InfoButton() {
               <TableBody>
                 <TableRow>
                   {/* DATA DE FORMATURA */}
-                  <TableCell>99/99/9999</TableCell>
+                  <TableCell>{formatDate(military.graduatedAt)}</TableCell>
 
                   {/* ULTIMA PROMOCAO*/}
-                  <TableCell>99/99/9999</TableCell>
+                  <TableCell>{formatDate(military.lastPromotedAt)}</TableCell>
 
                   {/* DATA DE PRAÇA */}
-                  <TableCell>99/99/9999</TableCell>
+                  <TableCell>{formatDate(military.pracaAt)}</TableCell>
 
                   {/* DATA DE APRESENTACAO */}
-                  <TableCell>99/99/9999</TableCell>
+                  <TableCell>{formatDate(military.presentationDate)}</TableCell>
 
                   {/* TEMPO DE AREA */}
-                  <TableCell>99/99/9999</TableCell>
+                  <TableCell>{calculateAreaTime()}</TableCell>
 
                   {/* TEMPO DE SERVICO */}
-                  <TableCell>99/99/9999</TableCell>
+                  <TableCell>{calculateServiceTime()}</TableCell>
 
                   {/* SITUACAO */}
-                  <TableCell>EXPEDIENTE</TableCell>
+                  <TableCell>{military.situation}</TableCell>
 
                   {/* NOTA DO TESTE OPERACIONAL */}
-                  <TableCell>10</TableCell>
+                  <TableCell>
+                    {military.operationalTests.length > 0
+                      ? String(military.operationalTests[0].score)
+                      : "N/A"}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -173,28 +270,36 @@ export default function InfoButton() {
               <TableBody>
                 <TableRow>
                   {/* AVALIADOR? */}
-                  <TableCell>SIM</TableCell>
+                  <TableCell>{military.examiner ? "SIM" : "NÃO"}</TableCell>
 
                   {/* DATA PROVA TEORICA */}
-                  <TableCell>99/99/9999</TableCell>
+                  <TableCell>
+                    {military.theoreticalTestDates.length > 0
+                      ? formatDate(military.theoreticalTestDates[0].testAt)
+                      : "N/A"}
+                  </TableCell>
 
                   {/* LPNA */}
-                  <TableCell>123456789</TableCell>
+                  <TableCell>{military.lpna}</TableCell>
 
                   {/* VALIDADE DA HT */}
-                  <TableCell>99/99/9999</TableCell>
+                  <TableCell>{formatDate(military.htValidityAt)}</TableCell>
 
                   {/* STATUS DA HT */}
-                  <TableCell>OK</TableCell>
+                  <TableCell>{getDateStatus(military.htValidityAt)}</TableCell>
 
                   {/* INSPSAU */}
-                  <TableCell>99/99/9999</TableCell>
+                  <TableCell>
+                    {formatDate(military.inspsauValidityAt)}
+                  </TableCell>
 
                   {/* STATUS INSPSAU */}
-                  <TableCell>OK</TableCell>
+                  <TableCell>
+                    {getDateStatus(military.inspsauValidityAt)}
+                  </TableCell>
 
                   {/* DATA DE NASCIMENTO */}
-                  <TableCell>99/99/9999</TableCell>
+                  <TableCell>{formatDate(military.birthDateAt)}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

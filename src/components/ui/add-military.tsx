@@ -189,7 +189,7 @@ export default function AddMilitary() {
       presentationDate: presentationDate,
       htValidityAt: htValidity,
       inspsauValidityAt: inspsauValidity,
-      examiner: examiner,
+      examiner: examiner === "yes",
       areaTimeAt: presentationDate,
       operationalScore: operationalScore,
       theoreticalDate: theoreticalDate,
@@ -257,7 +257,7 @@ export default function AddMilitary() {
               <Label htmlFor="grad">POSTO/GRAD</Label>
               <Input
                 id="grad"
-                placeholder="SO"
+                placeholder="SO, 1S, 2S..."
                 value={grad}
                 onChange={(e) => setGrad(e.target.value)}
               />
