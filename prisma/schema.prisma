@@ -8,114 +8,92 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(uuid())
-  email    String   @unique
-  name     String
-  role     UserRole @default(READONLY)
-  isActive Boolean  @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String
+  role          UserRole  @default(READONLY)
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
 }
 
-enum UserRole {
-  ADMIN
-  OPERATOR
-  READONLY
+model Session {
+  id        String   @id @default(uuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @default(uuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
 }
 
 model Military {
-  // ID para encontrar o usuário no BD
-  id String @id @default(uuid())
-
-  // Posto / Graduacao -> 3S / 2S / 1S / SO
-  militaryRank MilitaryRank
-
-  // Nome completo
-  fullName String
-
-  // Nome de guerra
-  warName String
-
-  // Secao -> COM, CIVA, FIS, OPG, SAR, DT, DTCEA-BE, DTCEA-BV, DTCEA-PV, DTCEA-GM
-  section Section
-
-  // Situacao -> escala / expediente
-  situation MilitarySituation
-
-  // ************************************
-
-  // Habilitacoes -> FIS / AFIS-S / AFIS-R /
-  qualifications Qualification[]
-
-  // Manutencao? -> Sim ou Nao
-  maintenance Boolean
-
-  // ************************************
-
-  // Documentos
-  identity String @unique
-  saram    String @unique
-  cpf      String @unique
-  lpna     String @unique
-
-  // ************************************
-
-  // CONTATO
-  phone String @unique
-  email String @unique
-
-  // ************************************
-
-  // Data de nascimento
-  birthDateAt DateTime
-
-  // Data de formatura
-  graduatedAt DateTime
-
-  // Data da ultima promocao
-  lastPromotedAt DateTime
-
-  // Data de praca
-  pracaAt DateTime
-
-  // Data de apresentacao
-  presentationDate DateTime
-
-  // ************************************
-
-  // Validade da HT
-  htValidityAt DateTime
-
-  // Data da inspecao de saude
-  inspsauValidityAt DateTime
-
-  // ************************************
-
-  // Avaliador?
-  examiner Boolean
-
-  // ************************************
-
-  // Tempo de area
-  areaTimeAt DateTime
-
-  // Tempo de servico -> tem que atualizar automaticamente com o passar dos dias -> tempo de servico = data atual - data de praca
-  //dutyTimeAt DateTime
-
-  // ************************************
-
-  // Nota no teste operacional -> sera um array de notas
-  operationalTests OperationalTest[]
-
-  // Data do teste teorico -> sera um array de datas
+  id                   String            @id @default(uuid())
+  militaryRank         MilitaryRank
+  fullName             String
+  warName              String
+  section              Section
+  situation            MilitarySituation
+  maintenance          Boolean
+  identity             String            @unique
+  saram                String            @unique
+  cpf                  String            @unique
+  lpna                 String            @unique
+  phone                String            @unique
+  email                String            @unique
+  birthDateAt          DateTime
+  graduatedAt          DateTime
+  lastPromotedAt       DateTime
+  pracaAt              DateTime
+  presentationDate     DateTime
+  htValidityAt         DateTime
+  inspsauValidityAt    DateTime
+  examiner             Boolean
+  areaTimeAt           DateTime
+  visible              Boolean           @default(true)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  operationalTests     OperationalTest[]
+  qualifications       Qualification[]
   theoreticalTestDates TheoreticalTest[]
-
-  // Visivel ou nao
-  visible Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@index([section])
   @@index([militaryRank])
@@ -123,6 +101,45 @@ model Military {
   @@index([visible])
   @@index([htValidityAt])
   @@index([inspsauValidityAt])
+}
+
+model Qualification {
+  id         String   @id @default(uuid())
+  militaryId String
+  name       String
+  military   Military @relation(fields: [militaryId], references: [id], onDelete: Cascade)
+
+  @@index([militaryId])
+  @@index([name])
+}
+
+model OperationalTest {
+  id         String   @id @default(uuid())
+  militaryId String
+  score      Decimal
+  testAt     DateTime
+  createdAt  DateTime @default(now())
+  military   Military @relation(fields: [militaryId], references: [id], onDelete: Cascade)
+
+  @@index([militaryId])
+  @@index([testAt])
+}
+
+model TheoreticalTest {
+  id         String   @id @default(uuid())
+  militaryId String
+  testAt     DateTime
+  createdAt  DateTime @default(now())
+  military   Military @relation(fields: [militaryId], references: [id], onDelete: Cascade)
+
+  @@index([militaryId])
+  @@index([testAt])
+}
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+  READONLY
 }
 
 enum Section {
@@ -149,48 +166,4 @@ enum MilitaryRank {
   Rank_1S
   Rank_2S
   Rank_3S
-}
-
-// Tabela de habilitacoes -> FIS, CIVA, SAR...
-model Qualification {
-  id String @id @default(uuid())
-
-  militaryId String
-  military   Military @relation(fields: [militaryId], references: [id], onDelete: Cascade)
-
-  name String
-
-  @@index([militaryId])
-  @@index([name])
-}
-
-// Tabela de notas nos testes operacionais
-model OperationalTest {
-  id String @id @default(uuid())
-
-  militaryId String
-  military   Military @relation(fields: [militaryId], references: [id], onDelete: Cascade)
-
-  score  Decimal
-  testAt DateTime
-
-  createdAt DateTime @default(now())
-
-  @@index([militaryId])
-  @@index([testAt])
-}
-
-// Tabela de datas dos testes teóricos
-model TheoreticalTest {
-  id String @id @default(uuid())
-
-  militaryId String
-  military   Military @relation(fields: [militaryId], references: [id], onDelete: Cascade)
-
-  testAt DateTime
-
-  createdAt DateTime @default(now())
-
-  @@index([militaryId])
-  @@index([testAt])
 }
