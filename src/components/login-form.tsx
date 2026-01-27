@@ -18,12 +18,11 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   async function handleSignInWithGoogle() {
-    const { error } = await authClient.signIn.social({
+    await authClient.signIn.social({
       provider: "google",
       callbackURL: "/dashboard",
+      errorCallbackURL: "/login",
     });
-
-    if (error) return;
   }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
