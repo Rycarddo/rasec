@@ -65,6 +65,16 @@ model Verification {
   @@index([identifier])
 }
 
+model AllowedEmail {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  role      UserRole @default(READONLY)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
 model Military {
   id                   String            @id @default(uuid())
   militaryRank         MilitaryRank

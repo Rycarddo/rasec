@@ -15,33 +15,8 @@ import AddMilitary from "./ui/add-military";
 import { useEffect, useState } from "react";
 import { getMilitaries } from "@/actions/get-militaries";
 
-type Military = {
-  id: string;
-  militaryRank: string;
-  fullName: string;
-  warName: string;
-  section: string;
-  situation: string;
-  qualifications: { id: string; name: string; militaryId: string }[];
-  maintenance: boolean;
-  identity: string;
-  saram: string;
-  cpf: string;
-  lpna: string;
-  phone: string;
-  email: string;
-  birthDateAt: Date;
-  graduatedAt: Date;
-  lastPromotedAt: Date;
-  pracaAt: Date;
-  presentationDate: Date;
-  htValidityAt: Date;
-  inspsauValidityAt: Date;
-  examiner: boolean;
-  areaTimeAt: Date;
-  operationalTests: { id: string; score: number | string; testAt: Date; militaryId: string; createdAt: Date }[];
-  theoreticalTestDates: { id: string; testAt: Date; militaryId: string; createdAt: Date }[];
-};
+type MilitaryResult = Awaited<ReturnType<typeof getMilitaries>>;
+type Military = NonNullable<MilitaryResult["data"]>[number];
 
 export default function ControlTable() {
   const [militaries, setMilitaries] = useState<Military[]>([]);
@@ -52,7 +27,7 @@ export default function ControlTable() {
     setLoading(true);
     const result = await getMilitaries();
     if (result.success && result.data) {
-      setMilitaries(result.data as unknown as Military[]);
+      setMilitaries(result.data);
     }
     setLoading(false);
   };

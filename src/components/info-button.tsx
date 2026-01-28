@@ -15,55 +15,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScanSearch, SquarePen, Save } from "lucide-react";
-import { useState } from "react";
+import { ScanSearch, SquarePen } from "lucide-react";
+import type { getMilitaries } from "@/actions/get-militaries";
 
-type Military = {
-  id: string;
-  militaryRank: string;
-  fullName: string;
-  warName: string;
-  section: string;
-  situation: string;
-  qualifications: { id: string; name: string; militaryId: string }[];
-  maintenance: boolean;
-  identity: string;
-  saram: string;
-  cpf: string;
-  lpna: string;
-  phone: string;
-  email: string;
-  birthDateAt: Date;
-  graduatedAt: Date;
-  lastPromotedAt: Date;
-  pracaAt: Date;
-  presentationDate: Date;
-  htValidityAt: Date;
-  inspsauValidityAt: Date;
-  examiner: boolean;
-  areaTimeAt: Date;
-  operationalTests: {
-    id: string;
-    score: number | string;
-    testAt: Date;
-    militaryId: string;
-    createdAt: Date;
-  }[];
-  theoreticalTestDates: {
-    id: string;
-    testAt: Date;
-    militaryId: string;
-    createdAt: Date;
-  }[];
-};
+type MilitaryResult = Awaited<ReturnType<typeof getMilitaries>>;
+type Military = NonNullable<MilitaryResult["data"]>[number];
 
 interface InfoButtonProps {
   military: Military;
 }
 
 export default function InfoButton({ military }: InfoButtonProps) {
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("pt-BR");
   };
@@ -122,6 +84,14 @@ export default function InfoButton({ military }: InfoButtonProps) {
               Informações completas - {military.warName}
             </DialogTitle>
 
+            {/*
+
+            Quando eu for implementar deverá ocorrer isso:
+              Ao clicar na "SquarePen" irá trocar para o "Save" e permitirá a edição de todos os campos das tabelas
+              E ao clicar em "Save" irá fazer as alterações no banco de dados.
+
+              Não esquecerrrr
+             */}
             <div className="flex size-5">
               <SquarePen className="cursor-pointer" />
             </div>
