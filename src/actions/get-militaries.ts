@@ -1,7 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireAuth, hasPermission } from "@/lib/auth-guard";
+import { requireAuth } from "@/lib/auth-guard";
+import { hasPermission } from "@/lib/auth-utils";
 
 // Funções para mascarar dados sensíveis
 function maskCPF(cpf: string): string {

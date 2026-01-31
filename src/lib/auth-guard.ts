@@ -2,8 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-
-export type UserRole = "ADMIN" | "OPERATOR" | "READONLY";
+import { hasPermission, type UserRole } from "@/lib/auth-utils";
 
 interface AuthResult {
   authenticated: boolean;
@@ -48,25 +47,6 @@ export async function getAuthenticatedUser(): Promise<AuthResult> {
       error: "Erro ao verificar autenticação",
     };
   }
-}
-
-/**
- * Verifica se o usuário tem permissão para executar uma ação baseado no role.
- * ADMIN: pode fazer tudo
- * OPERATOR: pode ler e criar/editar
- * READONLY: pode apenas ler
- */
-export function hasPermission(
-  userRole: UserRole,
-  requiredRole: UserRole
-): boolean {
-  const roleHierarchy: Record<UserRole, number> = {
-    READONLY: 1,
-    OPERATOR: 2,
-    ADMIN: 3,
-  };
-
-  return roleHierarchy[userRole] >= roleHierarchy[requiredRole];
 }
 
 /**
