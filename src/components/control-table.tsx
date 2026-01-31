@@ -14,6 +14,7 @@ import { Button } from "./ui/button";
 import AddMilitary from "./ui/add-military";
 import { useEffect, useState } from "react";
 import { getMilitaries } from "@/actions/get-militaries";
+import { toast } from "sonner";
 
 type MilitaryResult = Awaited<ReturnType<typeof getMilitaries>>;
 type Military = NonNullable<MilitaryResult["data"]>[number];
@@ -22,12 +23,17 @@ export default function ControlTable() {
   const [militaries, setMilitaries] = useState<Military[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const loadMilitaries = async () => {
     setLoading(true);
+    setError(null);
     const result = await getMilitaries();
     if (result.success && result.data) {
       setMilitaries(result.data);
+    } else {
+      setError(result.error || "Erro ao carregar dados");
+      toast.error(result.error || "Erro ao carregar dados");
     }
     setLoading(false);
   };
@@ -122,6 +128,12 @@ export default function ControlTable() {
             <TableRow>
               <TableCell colSpan={12} className="text-center">
                 Carregando...
+              </TableCell>
+            </TableRow>
+          ) : error ? (
+            <TableRow>
+              <TableCell colSpan={12} className="text-center text-red-500">
+                {error}
               </TableCell>
             </TableRow>
           ) : filteredMilitaries.length === 0 ? (
